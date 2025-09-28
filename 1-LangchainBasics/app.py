@@ -56,7 +56,7 @@ def get_chain(api_key, model_name):
 
     # Create prompt template
     prompt = ChatPromptTemplate.from_messages([
-        ("system","You are a helpfu; assistant powered by Groq. Answer questions clearly and concisely."),
+        ("system","You are a helpful assistant powered by Groq. Answer questions clearly and concisely."),
         ("human",{question})
     ])
 
@@ -74,12 +74,12 @@ if not chain:
 
 else:
     ## display the chat message
-    for message in st.seesion_state.messages:
+    for message in st.session_state.messages:
         with st.chat_message(message['role']):
             st.write(message['content'])
     
     ## chat input 
-    if question:=st.chat_input("Ask me anything"):
+    if question:= st.chat_input("Ask me anything"):
         # Ass user messages to session state
         st.session_state.messages.append({"role":"user", "content":question})
         with st.chat_message("user"):
