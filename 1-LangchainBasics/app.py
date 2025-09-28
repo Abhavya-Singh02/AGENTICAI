@@ -4,6 +4,8 @@ Simple Langchain Streamlit app with Groq
 A beginner-friendly version focusing on core concepts
 """
 
+import sys
+import io
 import streamlit as st
 from langchain.chat_models import init_chat_model
 from langchain_groq import ChatGroq
@@ -11,6 +13,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 import os
+
+# Force stdout and stderr to use UTF-8 to avoid ASCII errors with emojis
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # Page config
 st.set_page_config(page_title="Simple Langchain Chatbot with Groq", page_icon="🚀")
