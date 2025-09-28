@@ -57,7 +57,7 @@ def get_chain(api_key, model_name):
     # Create prompt template
     prompt = ChatPromptTemplate.from_messages([
         ("system","You are a helpful assistant powered by Groq. Answer questions clearly and concisely."),
-        ("human",{question})
+        ("human","{question}")
     ])
 
 
