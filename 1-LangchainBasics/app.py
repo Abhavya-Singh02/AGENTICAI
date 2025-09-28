@@ -1,113 +1,111 @@
-# -*- coding: utf-8 -*-
 """
-Simple Langchain Streamlit app with Groq
+Simple LangChain Streamlit App with Groq
 A beginner-friendly version focusing on core concepts
 """
 
-import sys
-import io
 import streamlit as st
 from langchain.chat_models import init_chat_model
 from langchain_groq import ChatGroq
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage,AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 import os
 
-# Force stdout and stderr to use UTF-8 to avoid ASCII errors with emojis
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
-# Page config
-st.set_page_config(page_title="Simple Langchain Chatbot with Groq", page_icon="🚀")
+## Page config
+st.set_page_config(page_title="Simple LangChain Chatbot with Groq", page_icon="🚀")
 
 # Title
 st.title("🚀 Simple LangChain Chat with Groq")
-st.markdown("Learn Langchain basics with Groq's ultra-fast inference!")
+st.markdown("Learn LangChain basics with Groq's ultra-fast inference!")
 
-# Sidebar
 with st.sidebar:
     st.header("Settings")
 
-    # API key
-    api_key = st.text_input("GROQ API key", type="password", help="Get free API key at console.groq.com")
+    ## APi Key
+    api_key=st.text_input("GROQ API Key", type="password",help="GET Free API Key at console.groq.com")
 
-    # Model selection
-    model_name = st.selectbox(
-        "Model", ["llama3-8b-8192", "gemma2-9b-it"],
-        index=0
+    ## Model Selection
+    model_name=st.selectbox(
+        "Model",
+        ["llama3-8b-8192", "gemma2-9b-it"],
+         index=0
     )
 
-    # Clear chat
+    # Clear button
     if st.button("Clear Chat"):
         st.session_state.messages = []
-        st.experimental_rerun()
+        st.rerun()
 
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Initialize LLM
+## Initialize LLM
 @st.cache_resource
-def get_chain(api_key, model_name):
+def get_chain(api_key,model_name):
     if not api_key:
         return None
-
-    llm = ChatGroq(
-        groq_api_key=api_key,
-        model_name=model_name,
-        temperature=0.7,
-        streaming=True
-    )
-
+    
+    ## Initialize the GROQ Model
+    llm=ChatGroq(groq_api_key=api_key,
+             model_name=model_name,
+             temperature=0.7,
+             streaming=True)
+    
+    # Create prompt template
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are a helpful assistant powered by Groq. Answer questions clearly and concisely."),
-        ("human", "{question}")  # placeholder, filled at runtime
+        ("user", "{question}")
     ])
 
-    chain = prompt | llm | StrOutputParser
+    ## create chain
+    chain=prompt| llm | StrOutputParser()
+
     return chain
 
-# Get chain
-chain = get_chain(api_key, model_name)
+## get chain
+chain=get_chain(api_key,model_name)
 
 if not chain:
-    st.warning("Please enter your Groq API key in the sidebar to start chatting!")
-    st.markdown("[Get your free API key](https://console.groq.com)")
+    st.warning("👆 Please enter your Groq API key in the sidebar to start chatting!")
+    st.markdown("[Get your free API key here](https://console.groq.com)")
 
 else:
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message['role']):
-            st.write(message['content'])
+    ## Display the chat messages
 
-    # Chat input
-    if question := st.chat_input("Ask me anything"):
-        # Add user message to session state
-        st.session_state.messages.append({"role": "user", "content": question})
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    
+    ## chat input
+    if question:= st.chat_input("Ask me anything"):
+        ## Add user message to session state
+        st.session_state.messages.append({"role":"user","content":question})
         with st.chat_message("user"):
             st.write(question)
 
-        # Generate assistant response
+        # Generate response
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
-
+            
             try:
                 # Stream response from Groq
                 for chunk in chain.stream({"question": question}):
                     full_response += chunk
                     message_placeholder.markdown(full_response + "▌")
-
+                
                 message_placeholder.markdown(full_response)
-
-                # Add assistant response to history
+                
+                # Add to history
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
-
+                
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 
-# Example prompts
+## Examples
+
 st.markdown("---")
 st.markdown("### 💡 Try these examples:")
 col1, col2 = st.columns(2)
